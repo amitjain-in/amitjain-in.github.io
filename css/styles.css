@@ -1,0 +1,43 @@
+body {
+    font: 62.5%/1.5  "Lucida Grande", "Lucida Sans", Tahoma, Verdana, sans-serif; 
+    color: #000000;     
+    text-align:center;     
+}
+
+h1 { 
+   font-size: 2.2em; 
+} 
+     
+h2 { 
+    font-size: 2.0em;     
+} 
+     
+h3 { 
+    font-size: 1.8em; 
+} 
+     
+h4 { 
+    font-size: 1.6em;     
+} 
+     
+h5 { 
+    font-size: 1.4em;     
+} 
+     
+p { 
+    font-size: 1.2em;     
+}
+
+.listtitle {
+    font-weight: bold;
+    font-size: 1.2em;
+}
+
+#wrapper 
+    {  
+    width:980px;  
+    text-align:left;   
+    margin-left:auto;  
+    margin-right:auto;  
+    background-color: #FFFFFF; 
+}

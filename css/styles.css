@@ -1,38 +1,62 @@
 body {
-    font: 62.5%/1.5  "Lucida Grande", "Lucida Sans", Tahoma, Verdana, sans-serif; 
+    font: 62.5%/1.1  "Lucida Grande", "Lucida Sans", Tahoma, Verdana, sans-serif; 
     color: #000000;     
     text-align:center;
-    font-size: 1.2em; 
+    font-size: 14px;
+}
+
+ol {
+    list-style-type: decimal;
+}
+
+ol li {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+ul.sub {
+    list-style-type: none;
+}
+
+ul.sub li {
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+
+ul.sub li:before {
+    content: "- ";
+    font-weight: bold;
 }
 
 h1 { 
-   font-size: 2.2em; 
+   font-size: 2.0em; 
 } 
      
 h2 { 
-    font-size: 2.0em;     
+    font-size: 1.8em;     
 } 
      
 h3 { 
-    font-size: 1.8em; 
+    font-size: 1.6em; 
 } 
      
 h4 { 
-    font-size: 1.6em;     
-} 
-     
-h5 { 
     font-size: 1.4em;     
 } 
      
-p { 
+h5 { 
     font-size: 1.2em;     
+} 
+     
+p { 
+    font-size: 1.0em;     
 }
 
 .listtitle {
     font-weight: bold;
-    font-size: 1.2em;
+    font-size: 1.0em;
 }
+
 
 #wrapper 
     {  

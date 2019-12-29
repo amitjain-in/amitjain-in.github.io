@@ -20,13 +20,11 @@
 
 title: Amit Jain
 email: amit.jain.in@outlook.com
-description: >- # this means to ignore newlines until "baseurl:"
-  Developer proficient and Java and various other things.
+description: Software architect
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "" # the base hostname & protocol for your site, e.g. http://example.com
-twitter_username: jekyllrb
 github_username:  amitjain-in
-
+linkedin_username: amit5094
 # Build settings
 theme: minima
 plugins:

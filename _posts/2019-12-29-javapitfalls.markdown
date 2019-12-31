@@ -3,9 +3,10 @@ layout: post
 title:  "Java Pitfalls"
 date:   2019-12-29 17:52:52 +0530
 categories: Java-Pitfalls Java  Java-Mistakes
+tags: Java JavaPitfalls Java Mistakes
 ---
 Java is an [extensively](https://www.tiobe.com/tiobe-index/java/) used programming language over last two decades and it is likely to stay relevant at least for some more, because a huge number of commercial and open source projects has been using it.
-This article will try to point out some of the things that beginners/intermediate level programmers need to be aware of while working with Java. Some of them are straight out obvious while few of them would be subject to personal preferences. 
+This article will point out some of the things that beginners/intermediate level programmers need to be aware of while working with Java. Some of them are straight out obvious while few of them would be subject to personal preferences. 
 
 ## Common coding mistakes
 Let’s go over some common coding mistakes that Java programmers make.
@@ -15,7 +16,8 @@ A hotspot for many bugs seen in several Java applications which is due to missin
 Mistakes made:
 - These methods are not overridden - In such scenarios, Java will use the default Object's implementation of equals/hashCode method and that would result in bugs when these are used in collections.
 - Using variables whose values can be mutated even after object creation - If we are using any mutable variables then it could result in different return values for the same object when called multiple times which would result in incorrect equality checks.
-- Does not use @Override tag and instead use same class parameter. This doesn’t override the intended equals method. If they are annotated with Override tag then Java compiler will not compile due to incorrect method parameters. The equals method takes in Object and not the same class parameter.
+- Does not use @Override tag and use same class parameter in equals method. This doesn’t override the intended equals method from the Object class. If they are annotated with Override tag then Java compiler will not compile due to incorrect method parameters. The equals method takes in Object and not the same class parameter.
+- Not handling null parameters. Your equals implementation should clearly state the behaviour while comparing with null objects.
 {% highlight java %}
 public class EqualsExample {
   //Bug as it incorrectly overrides
@@ -42,10 +44,6 @@ While using an existing APIs some developers often overlook the warnings in the 
 
 - [SimpleDateFormat](https://docs.oracle.com/javase/8/docs/api/java/text/SimpleDateFormat.html) - You need either create new object every time you have parse/format or use threadlocal
 {% highlight java %}
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
 public class SimpleDateFormatExample {
     private final SimpleDateFormat dateFormatUnsafe = new SimpleDateFormat("dd-MMM-yyyy");
     private final ThreadLocal<SimpleDateFormat> dateFormatSafe = new ThreadLocal<SimpleDateFormat>() {
@@ -73,10 +71,6 @@ public class SimpleDateFormatExample {
 {% endhighlight %}
 - [HashMap](https://docs.oracle.com/javase/8/docs/api/java/util/HashMap.html) - Using HashMap can cause infinite loops in case multiple threads try to insert concurrently. This happens when the Hashmap is resizing its internal data structures to increase the HashMap capacity. Most beginners/intermediate programmers are unaware of this and generally face this first time during a production environment by when it will be too late.
 {% highlight java %}
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 public class MapExample {
 
     public final Map<String, String>  hashMap = new HashMap<>();
@@ -95,13 +89,15 @@ public class MapExample {
 {% endhighlight %}
 - Iterating over a fail-fast iterators can result in ConcurrentModificationException
 
-### 3. Unrestricted access specifiers
-Java has multiple access specifiers for its classes and people often use incorrect ones in their programs which can lead to bugs.
+There are many more examples and a general rule is that read the class and the method documentation for thread-safety notes before you use them in your code.
 
-- Using public access specifiers for field variables.
-- Starting with default. If you do not provide any access specifiers then it uses default which less restrictive then private
-- Not using final for variables whose value is assigned only once.
-- Marking a variable as static when it should have been a member variable
+### 3. Unrestricted access specifiers
+Java has multiple access specifiers for its classes and people often use incorrect ones in their programs which can lead to bugs or difficult to maintain codebase.
+
+- Using public access specifiers for field variables. Field variables should be least accessible as maintain the encapsulation principles of OOP.
+- Starting with default. If you do not provide any access specifiers then it uses default which is less restrictive then private
+- Not using final for variables whose value is assigned only once. State the intent of the variable in your declaration, final implies that the value cannot change and the compiler will throw out an error if you attempt to do so.
+- Marking a variable as static when it should have been a member variable. Static variables are global states and the one of the worst design mistakes that people make, but also accidentally marking a variable as static when it should have been member variable is bound to cause issues when multiple objects try to change the value of the single instance of the variable.
 {% highlight java %}
 public class AccessSpecifiersExample {
    public String badAccessSpecifier = "Everyone Can Access Me";
@@ -114,25 +110,25 @@ public class AccessSpecifiersExample {
 {% endhighlight %}
 
 ### 4. Exception Handling
-Java exception handling has been divided into two parts - checked and unchecked exceptions.
-- This is a very common sight for a programmer to catch an exception and not to do anything with it. Depending on the use case you should either log the exception or throw it further in the call hierarchy.
-There are few rare scenarios where you would not want to do anything with it.
+Java exception handling has been divided into two parts - checked and unchecked exceptions and many people are still confused with their behaviours.
+- This is a very common sight for a programmer to catch an exception and not to do anything with it. Depending on the use case you should either log the exception or throw it further in the call hierarchy to let someone else manage it. Unreported exceptions can be suppressing major issues in your program and could even slow it down.
+There are only a few rare scenarios where you would not want to do anything with it.
 - Catching Throwable - [Throwable](https://docs.oracle.com/javase/8/docs/api/java/lang/Throwable.html) is root class which has both Errors and Exceptions extending from it.
 While catching exceptions and dealing with it is required, you almost never catch an Error has it generally implies something bad happened and program should be stopped (e.g. OutOfMemory).
+Hence, avoid catching a Throwable and in your code.
 
 
 ### 5. Floating point comparison
-While this is not restricted to Java as the computer hardware representation for floating points has limited precision and results in minor precision errors when storing and calculating floating points. Care has to be taken to ensure that the epslion error is handled while comparing such variables. There are already available DoubleUtils classes in many open source project and they should be used if you already their dependencies included.
+While this is not restricted to Java as the computer hardware representation for floating points has limited precision and results in minor precision errors when storing and calculating floating points. Care has to be taken to ensure that the epslion error is handled while comparing such variables. There are already available DoubleUtils classes in many open source project and they should be used.
 e.g. Google's [Guava libraries](https://github.com/google/guava/blob/master/guava/src/com/google/common/math/DoubleUtils.java)
 
 ### 6. Concurrency
-- Not handling exceptions when running tasks in a threadpool.
-- Using data structures/APIs which are not thread-safe (e.g. HashMap, LinkedList, ArrayList)
-- Using primitive or volatile variable for concurrent calculations. Primitive and Volatile variables do not provide atomic guarantees for your calculations. You need to either make your code synchronized or use Atomic variables for same. Atomic variables are more efficient in such cases as they compare and swap CPU instructions.
+Concurrency is a very vast topic and would require a blog in itself but we can point out few common issues we have seen repeatedly.
+- Not handling exceptions when running tasks in a threadpools. If your tasks throw exception and the thread from pool might die because of unhandled exception and this will reduce the number of pools available and which will eventually become zero causing your application to stop running.
+- Using data structures/APIs which are not thread-safe (e.g. HashMap, LinkedList, ArrayList). Always check the thread-safety notes in the API documentation before using one.
+- Using primitive or volatile variable for concurrent calculations. Primitive and Volatile variables do not provide atomic guarantees for your calculations. You need to make your synchronized to make these calculations thread-safe. Alternatively, atomic variables are more efficient in such cases as they use CAS (compare and swap) CPU instructions.
 
 {% highlight java%}
-import java.util.concurrent.atomic.AtomicInteger;
-
 public class ConcurrentIncrementExample {
 
     private int primitiveCounter = 0;
@@ -160,7 +156,7 @@ public class ConcurrentIncrementExample {
 - **Not closing Network/File/DB resources** - Whenever you are connecting to a network, connect to DB(which is also over the network), access a file you are required to free resources once the processing is complete. These actions consume a OS level resource which are limited in numbers. When they are not closed it can lead to these resources not being available to your program. An example is *Too many open files*”* because everything in linux is a file. Additionally close the resources in the finally block or use try with finally which is available since Java 7
 
 ### 8. Others
-- **String immutability** - Since String is an immutable class in Java and method called upon it returns a new string which should be used for further use. The original String remains unchanged. A progammer 
+- **String immutability** - Since String is an immutable class in Java and method called upon it returns a new string which should be used for further use. The original String remains unchanged. 
 {% highlight java %}
 public class StringExample {
     
@@ -172,7 +168,7 @@ public class StringExample {
 }
 {%endhighlight%}
 - **System.nanoTime()** - This method can only be used to evaluate the elapsed time in your code and not to get the current time. Use System.currentTimeMillis if you would like to get current time.
-- **Using "==" operator for Object comparison** - The equality operator "==" will only compare the references and not the content of the objects
+- **Using "==" operator for Object comparison** - The equality operator "==" will only compare the references and not the content of the objects.
 {%highlight java%}
 public class StringExample {
 
@@ -199,16 +195,16 @@ While in some rare cases it may be required, using too much exceptions for logic
 
 ### 4. Too much inheritance
 There is a very important design pattern in OOP world called as *Program to interface and not implementation*. This becomes more useful as Java doesn't allow multiple inheritance unlike C++. Interfaces are Java's  replacement for multiple inheritance.
-Also, tn order to achieve code reusability many novice programmers tend to extend other classes, this would very soon lead to very complex classes hierarchies which becomes very difficult to maintain. Prefer composition to inheritance.
+Also, in order to achieve code reusability many novice programmers tend to extend other classes, this would very soon lead to very complex classes hierarchies which becomes very difficult to maintain. Prefer composition to inheritance.
 
 
 ## Other problems
 ### 1. Not using an IDE
-As a first time programmer learning java, some tutorials would guide you through compiler and run command tools like javac, java. While it may be the right approach for your first couple of programs very soon you will start to feel the pinch of typing the code in your editor and then going back to javac to see if runs or not. The bigger the project, the more cumbersome it becomes and hence you need start using IDEs. There are several benefits writing code in IDEs in Java
+As a first time programmer learning java, some tutorials would guide you through compiler and run command tools like javac, java. While it may be the right approach for your first couple of programs very soon you will start to feel the pinch of typing the code in your editor and then going back to javac to see if runs or not. The bigger the project, the more cumbersome it becomes and hence you need start using IDEs. There are several benefits writing code in IDEs in Java.
 
-- Java is a statically typed language and the IDEs point out errors and suspicious code while you are typing them. This alone would save you huge amount of time in the long run.
+- Java is a statically typed language and that allows the IDEs to point most errors and suspicious code while you are typing them. This alone would save you a huge amount of time in the long run.
 - Java IDEs can refactor the code far smartly and almost completely error free in most cases.
-- There is another huge benefit of IDEs that it would suggest you improvements over your code and in a sense that becomes your guide. Below is an example with Intellij idea. My intent is write method which inserts into map if there is no element found in the map. Intellij Idea is suggesting me instead use [computeIfAbsent](https://docs.oracle.com/javase/8/docs/api/java/util/Map.html#computeIfAbsent-K-java.util.function.Function-) which is more readable and can even be thread-safe when used with [ConcurrentHashMap](https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/ConcurrentHashMap.html) as an implementation.
+- There is another huge benefit of IDEs that it would suggest you improvements over your code and in a sense that becomes your guide/tutor. Below is an example with Intellij idea. My intent is write method which inserts into map if there is no element found in the map. Intellij Idea is suggesting me instead use [computeIfAbsent](https://docs.oracle.com/javase/8/docs/api/java/util/Map.html#computeIfAbsent-K-java.util.function.Function-) which is more readable and can even be thread-safe when used with [ConcurrentHashMap](https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/ConcurrentHashMap.html) as an implementation.
 
 Another e.g. for below code intellij suggests to use merge method
 {% highlight java%}
